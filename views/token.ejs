@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Token</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src = "/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+      $(document).ready(function(){
+        getTokenHistory();
+        $("#btngetbalance").click(function(e){
+            e.preventDefault();
+            $.ajax({
+                method:"post",
+                url:"/gettokenbalance",
+                data:"addr=" + $("#balanceaddr").val()
+            }).done(function(result){
+                $("#divbalance").html(result.balance + ' MT');
+            })
+        });
+
+        $("#btnsendtoken").click(function(e){
+            e.preventDefault();
+            let formdata = $("#frmtoken").serialize();
+
+            $.ajax({
+                method:'post',
+                url:'/sendtoken',
+                data: formdata
+            }).done(function(result){
+                alert("전송성공!");
+            })
+        });
+      })
+
+      function getTokenHistory(){
+        $.ajax({
+            method: "post",
+            url: "/gettokenhistory"
+        }).done(function( result ) {
+            $("#historycount").html(result.length);
+            let listobj = $("#historylist");
+            result.forEach(el => {
+            listobj.append(`<li class="list-group-item d-flex justify-content-between lh-sm">
+                <div>
+                <h6 class="my-0">From : ${el.returnValues.from}</h6>
+                <h6 class="my-0">To : ${el.returnValues.to}</h6>
+                <small class="text-muted">Trx Hash : ${el.transactionHash}</small>
+                </div>
+                <span class="text-muted">${el.returnValues.value}</span>
+            </li>`);
+            
+            });
+
+        });
+    }
+
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <main>
+        <div class="py-5 text-center">
+          <h2>컨트랙트 토큰 테스트!</h2>
+        </div>
+    
+        <div class="row g-5">
+          <div class="col-md-5 col-lg-4 order-md-last">
+            <form class="card p-2">
+              <h4 class="mb-3">토큰 잔액 조회</h4>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Address" id="balanceaddr">
+                <button class="btn btn-primary" id="btngetbalance">조회</button>
+              </div>
+              <div id="divbalance"></div>
+            </form>
+          </div>
+          <div class="col-md-7 col-lg-8">
+            <h4 class="mb-3">토큰 전송 테스트</h4>
+              <form id="frmtoken">
+                <div class="row g-3">
+                  <div class="col-sm-12">
+                    <label for="keystore" class="form-label">eth.accounts[0] keystore</label>
+                    <input type="text" class="form-control" id="keystore" name="keystore" placeholder="" value='{"address":"b3d1d4eeb7fabfdb0f96421ac101837c35d7648b","crypto":{"cipher":"aes-128-ctr","ciphertext":"e9ec0ad67583138d2326de9c0616b36dab2b5477e7843cd6886550ea6839319e","cipherparams":{"iv":"44feda2f47a6f326e647ff1343230641"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"37a1b22bde2a44699f95913a09066454aae98826ba81a808d47cb1f49eaab7ca"},"mac":"32e45f9aaa7a8f3ce1a34f32cfca058c9ca44c76bf90fe17faa632ee5d9aad3d"},"id":"f7f102f7-f331-41e0-92ed-86d367573284","version":3}' >
+                  </div>
+                  <div class="col-sm-12">
+                    <label for="keypassword" class="form-label">eth.accounts[0] password</label>
+                    <input type="text" class="form-control" id="keypassword" name="keypassword" placeholder="" value='' >
+                  </div>
+                  <div class="col-sm-12">
+                    <label for="keystore" class="form-label">To Address</label>
+                    <input type="text" class="form-control" id="toaddress" name="toaddress" placeholder="" value='' >
+                  </div>
+                  <div class="col-sm-12">
+                    <label for="keystore" class="form-label">Send Token value</label>
+                    <input type="text" class="form-control" id="tokenvalue" name="tokenvalue" placeholder="" value=''>
+                  </div>
+                </div>
+                <button class="w-50 btn btn-primary btn-lg my-2" id="btnsendtoken">Send Token</button>
+              </form>
+              <hr class="">
+          </div>
+        </div>
+        <div class="row">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-primary">거래이력</span>
+            <span class="badge bg-primary rounded-pill" id="historycount"></span>
+          </h4>
+          <ul class="list-group mb-3" id="historylist">
+          </ul>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
